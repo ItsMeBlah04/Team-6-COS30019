@@ -11,7 +11,7 @@ def parse_input_file(filename):
     nodes = {}                # Stores coordinates of nodes (not used in BFS logic)
     edges = {}                # Not used directly here
     origin = None             # Origin node
-    destinations = set()      # Set of destination node(s)
+    goals = set()      # Set of goal node(s)
     
     section = None  # To track the current section of the file being parsed
 
@@ -40,14 +40,14 @@ def parse_input_file(filename):
             origin = int(line.strip())
         elif section == "destinations":
             # Parse multiple destination nodes
-            destinations = set(map(int, line.strip().split(";")))
+            goals = set(map(int, line.strip().split(";")))
 
     # Return the constructed graph and start/end info
-    return graph, origin, destinations
+    return graph, origin, goals
 
 # Breadth-First Search (BFS) implementation
-def bfs(graph, origin, destinations):
-    visited = set()                 # Keep track of visited nodes
+def bfs(graph, origin, goals):
+    visited = set()                # Keep track of visited nodes
     queue = deque()                # FIFO queue for BFS
     queue.append((origin, [origin]))  # Start from origin with path containing just origin
     visited.add(origin)
@@ -58,7 +58,7 @@ def bfs(graph, origin, destinations):
         current_node, path = queue.popleft()  # Pop the next node from the queue
 
         # Check if current node is one of the destinations
-        if current_node in destinations:
+        if current_node in goals:
             return current_node, nodes_created, path
 
         # Get all neighbors, sorted in ascending order by node number
@@ -72,6 +72,33 @@ def bfs(graph, origin, destinations):
     # If no path is found
     return None, nodes_created, []
 
+def dfs(graph, origin, goals):
+    visited = set()                 # Keep track of visited nodes
+    stack = []                      # LIFO stack for DFS
+    stack.append((origin, [origin]))  # Start from origin with path containing just origin
+    visited.add(origin)
+    nodes_created = 1               # Counter for number of nodes added to stack
+
+    # Start DFS loop
+    while stack:
+        current_node, path = stack.pop()  # Pop the next node from the stack
+
+        # Check if current node is one of the destinations
+        if current_node in goals:
+            return current_node, nodes_created, path
+
+        # Get all neighbors, sorted in ascending order by node number
+        neighbors = sorted(graph[current_node], key=lambda x: x[0])
+        for neighbor, _ in neighbors:
+            if neighbor not in visited:
+                visited.add(neighbor)  # Mark as visited
+                stack.append((neighbor, path + [neighbor]))  # Append new path
+                nodes_created += 1     # Increment created node count
+
+    # If no path is found
+    return None, nodes_created, []
+
+
 # Main function to handle command-line arguments and execute the search
 def main():
     # Ensure correct usage with 2 command-line arguments
@@ -79,19 +106,24 @@ def main():
         print("Usage: python search.py <filename> <method>")
         sys.exit(1)
 
-    filename = sys.argv[1]       # First argument = input file
-    method = sys.argv[2].upper()  # Second argument = method (e.g., BFS)
+    filename = sys.argv[1]          # First argument = input file
+    method = sys.argv[2].upper()    # Second argument = method (e.g., BFS or DFS)
+    methods = ["BFS", "DFS"]        # List of all search functions
 
     # Check if method is BFS (only BFS is supported in this version)
-    if method != "BFS":
-        print("Only BFS method is implemented in this version.")
+    if methods.__contains__(method) == False:
+        print("Unsupported search method.\nSupported arguments are:")
+        print(*methods, sep=', ')
         sys.exit(1)
 
     # Parse the input file
-    graph, origin, destinations = parse_input_file(filename)
+    graph, origin, goals = parse_input_file(filename)
 
-    # Run BFS algorithm
-    goal, nodes_created, path = bfs(graph, origin, destinations)
+    # Select and run algorithm
+    if method == "BFS":
+        goal, nodes_created, path = bfs(graph, origin, goals)
+    elif method == "DFS":
+        goal, nodes_created, path = dfs(graph, origin, goals)
 
     # Print results in the required output format
     print(f"{filename} {method}")
