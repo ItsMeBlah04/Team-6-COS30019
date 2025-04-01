@@ -98,7 +98,35 @@ def dfs(graph, origin, goals):
     # If no path is found
     return None, nodes_created, []
 
-
+def a_star(graph, coords, start, goals):
+    goal_coords = coords[goals[0]]  # Target first goal (Node 5)
+    pq = [(0 + euclidean_distance(*coords[start], *goal_coords), 0, start, [start])]
+    visited = set()
+    nodes_expanded = 0
+    
+    print(f"Starting A* from {start} to {goals}")
+    while pq:
+        f, g, node, path = heappop(pq)
+        print(f"Expanding: {node}, f={f:.2f}, g={g}, path={path}")
+        if node in visited:
+            continue
+        visited.add(node)
+        nodes_expanded += 1
+        
+        if node in goals:
+            print(f"Goal {node} reached!")
+            return node, nodes_expanded, path
+        
+        for next_node, cost in graph.get(node, []):
+            if next_node not in visited:
+                new_g = g + cost
+                h = euclidean_distance(*coords[next_node], *goal_coords)
+                new_f = new_g + h
+                heappush(pq, (new_f, new_g, next_node, path + [next_node]))
+                print(f"Queued: {next_node}, f={new_f:.2f}")
+    
+    print("No goal reached")
+    return None, nodes_expanded, []
 # Main function to handle command-line arguments and execute the search
 def main():
     # Ensure correct usage with 2 command-line arguments
