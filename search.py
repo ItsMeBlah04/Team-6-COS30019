@@ -165,6 +165,26 @@ def AS(graph, origin, goals, coords):
                 nodes_created += 1
     return None, nodes_created, []
 
+def cus1(graph, origin, goals, limit=5):
+    visited = set()
+    stack = [(origin, [origin], 0)]  # node, path, depth
+    visited.add(origin)
+    nodes_created = 1
+
+    while stack:
+        current_node, path, depth = stack.pop()
+        if current_node in goals:
+            return current_node, nodes_created, path
+        if depth < limit:
+            neighbors = sorted(graph[current_node], key=lambda x: x[0])
+            for neighbor, _ in neighbors:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    stack.append((neighbor, path + [neighbor], depth + 1))
+                    nodes_created += 1
+
+    return None, nodes_created, []
+
 # Main
 def main():
         # Ensure correct usage with 2 command-line arguments
@@ -174,7 +194,7 @@ def main():
 
     filename = sys.argv[1]
     method = sys.argv[2].upper()
-    methods = ["BFS", "DFS", "AS", "GBFS"]
+    methods = ["BFS", "DFS", "AS", "GBFS", "CUS1"]
 
     if method not in methods:
         print("Unsupported search method.\nSupported arguments are:")
@@ -191,6 +211,8 @@ def main():
         goal, nodes_created, path = AS(graph, origin, goals, nodes)
     elif method == "GBFS":
         goal, nodes_created, path = gbfs(origin, goals, graph, nodes)
+    elif method == "CUS1":
+        goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
     # Print results in the required output format
     print(f"{filename} {method}")
     if goal:
