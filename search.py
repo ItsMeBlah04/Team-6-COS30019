@@ -6,6 +6,9 @@ from math import sqrt
 # Function to parse the input file and construct the graph, origin, and destinations
 def parse_input_file(filename):
     # Open and read all non-empty lines from the input file
+    '''
+        Parses the input file and returns the graph, nodes, origin, and goals.
+    '''
     with open(filename, 'r') as f:
         lines = [line.strip() for line in f if line.strip()]
     
@@ -43,8 +46,10 @@ def parse_input_file(filename):
     # Return the constructed graph and start/end info
     return graph, nodes, origin, goals
 
-# Breadth-First Search (BFS) implementation
 def bfs(graph, origin, goals):
+    '''
+        Breadth-First Search algorithm
+    '''
     visited = set() # Keep track of visited nodes
     queue = deque() # FIFO queue for BFS
     queue.append((origin, [origin])) # Start from origin with path containing just origin
@@ -67,8 +72,10 @@ def bfs(graph, origin, goals):
     # If no path is found            
     return None, nodes_created, []
 
-# Main function to handle command-line arguments and execute the search
 def dfs(graph, origin, goals):
+    '''
+        Depth-First Search algorithm
+    '''
     visited = set()
     stack = []
     stack.append((origin, [origin]))
@@ -86,11 +93,54 @@ def dfs(graph, origin, goals):
                 nodes_created += 1
     return None, nodes_created, []
 
-# A* (revamped)
+def gbfs(start, destinations, graph, nodes):
+    '''
+        Greedy Best-First Search algorithm.
+    '''
+    frontier = [(start, heuristic_v2(start, destinations, nodes), [start])]
+    visited = set()
+    nodes_created = 1  
+
+    while frontier:
+        frontier.sort(key=lambda x: (x[1], x[0]))
+        current, _, path = frontier.pop(0)
+
+        if current in visited:
+            continue
+        visited.add(current)
+
+        if current in destinations:
+            return current, nodes_created, path
+
+        neighbors = graph.get(current, [])
+        neighbors.sort(key=lambda x: x[0])
+
+        for neighbor, _ in neighbors:
+            if neighbor not in visited:
+                h = heuristic_v2(neighbor, destinations, nodes)
+                frontier.append((neighbor, h, path + [neighbor]))
+                nodes_created += 1
+
+    return None, nodes_created, []
+
+
+def heuristic_v2(node, destinations, nodes):
+    x1, y1 = nodes[node]
+    min_dist = None
+    for dst in destinations:
+        x2, y2 = nodes[dst]
+        dist = euclidean_distance(x1, y1, x2, y2)
+        if min_dist is None or dist < min_dist:
+            min_dist = dist
+    return min_dist
+
 def euclidean_distance(x1, y1, x2, y2):
     return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
 def AS(graph, origin, goals, coords):
+    '''
+        A* Search algorithm.
+    '''
     def heuristic(node):
         return min(euclidean_distance(*coords[node], *coords[g]) for g in goals)
     
@@ -122,10 +172,10 @@ def main():
         print("Usage: python search.py <filename> <method>")
         sys.exit(1)
 
-    filename = sys.argv[1] # First argument = input file
-    method = sys.argv[2].upper() # Second argument = method (e.g., BFS)
+    filename = sys.argv[1]
+    method = sys.argv[2].upper()
     methods = ["BFS", "DFS", "AS"]
-    # Check if method is BFS (only BFS is supported in this version)
+
     if method not in methods:
         print("Unsupported search method.\nSupported arguments are:")
         print(*methods, sep=', ')
