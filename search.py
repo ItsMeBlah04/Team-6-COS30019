@@ -102,7 +102,7 @@ def dfs(graph, origin, goals):
 def euclidean_distance(x1, y1, x2, y2):
     return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     
-def AS(graph, coords, start, goals):
+def a_star(graph, coords, start, goals):
     goal_coords = coords[goals[0]]  # Target first goal (Node 5)
     pq = [(0 + euclidean_distance(*coords[start], *goal_coords), 0, start, [start])]
     visited = set()
@@ -157,7 +157,7 @@ def main():
     elif method == "DFS":
         goal, nodes_created, path = dfs(graph, origin, goals)
     elif method == "AS":
-        goal, nodes_created, path = dfs(graph, origin, goals)
+        goal, nodes_created, path = a_star(graph, origin, goals)
 
     # Print results in the required output format
     print(f"{filename} {method}")
