@@ -1,6 +1,7 @@
 import sys
 from collections import deque, defaultdict
-
+from heapq import heappush, heappop
+from math import sqrt
 # Function to parse the input file and construct the graph, origin, and destinations
 def parse_input_file(filename):
     # Open and read all non-empty lines from the input file
@@ -97,8 +98,11 @@ def dfs(graph, origin, goals):
 
     # If no path is found
     return None, nodes_created, []
-
-def a_star(graph, coords, start, goals):
+    
+def euclidean_distance(x1, y1, x2, y2):
+    return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    
+def AS(graph, coords, start, goals):
     goal_coords = coords[goals[0]]  # Target first goal (Node 5)
     pq = [(0 + euclidean_distance(*coords[start], *goal_coords), 0, start, [start])]
     visited = set()
@@ -136,7 +140,7 @@ def main():
 
     filename = sys.argv[1]          # First argument = input file
     method = sys.argv[2].upper()    # Second argument = method (e.g., BFS or DFS)
-    methods = ["BFS", "DFS"]        # List of all search functions
+    methods = ["BFS", "DFS","AS"]        # List of all search functions
 
     # Check if method is BFS (only BFS is supported in this version)
     if methods.__contains__(method) == False:
