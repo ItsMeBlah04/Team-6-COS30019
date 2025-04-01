@@ -140,7 +140,7 @@ def main():
 
     filename = sys.argv[1]          # First argument = input file
     method = sys.argv[2].upper()    # Second argument = method (e.g., BFS or DFS)
-    methods = ["BFS", "DFS","AS"]        # List of all search functions
+    methods = ["BFS", "DFS", "AS"]        # List of all search functions
 
     # Check if method is BFS (only BFS is supported in this version)
     if methods.__contains__(method) == False:
@@ -155,6 +155,8 @@ def main():
     if method == "BFS":
         goal, nodes_created, path = bfs(graph, origin, goals)
     elif method == "DFS":
+        goal, nodes_created, path = dfs(graph, origin, goals)
+    elif method == "AS":
         goal, nodes_created, path = dfs(graph, origin, goals)
 
     # Print results in the required output format
