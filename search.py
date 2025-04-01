@@ -185,6 +185,72 @@ def cus1(graph, origin, goals, limit=5):
 
     return None, nodes_created, []
 
+def manhattan_distance(x1, y1, x2, y2):
+    """
+    Compute the Manhattan distance between two points.
+    Used as the heuristic in CUS2 to estimate the remaining number of moves.
+    
+    Args:
+        x1, y1 (int): Coordinates of the first point
+        x2, y2 (int): Coordinates of the second point
+    
+    Returns:
+        int: Manhattan distance
+    """
+    return abs(x1 - x2) + abs(y1 - y2)
+
+def CUS2(graph, origin, goals, coords):
+    """
+    Perform a custom informed search (CUS2) to find the path with the least number of moves
+    (edges) from the origin to any goal node. Uses Manhattan distance to estimate remaining moves.
+    
+    Args:
+        graph (defaultdict): Adjacency list of the graph
+        origin (int): Starting node ID
+        goals (set): Set of destination node IDs
+        coords (dict): Dictionary mapping node IDs to (x, y) coordinates
+    
+    Returns:
+        tuple: (goal, nodes_created, path)
+            - goal: First goal node reached (or None if no path)
+            - nodes_created: Number of nodes added to the priority queue
+            - path: List of node IDs from origin to goal (or empty list if no path)
+    """
+    def heuristic(node):
+        # Heuristic: estimate the number of moves to the nearest goal
+        # Use Manhattan distance scaled by an average edge length (approximated as 4)
+        # This approximates the remaining number of moves (edges) to the goal
+        avg_edge_length = 4  # Based on sample graph edge costs (4, 5, 6, etc.)
+        return min(manhattan_distance(*coords[node], *coords[g]) / avg_edge_length for g in goals)
+    
+    # Compute initial heuristic value for the origin
+    h_start = heuristic(origin)
+    # Priority queue: (f, g, node, path), where f = g + h
+    # g is the number of moves so far, h is the estimated remaining moves
+    pq = [(h_start, 0, origin, [origin])]
+    visited = set()  # Used only for goal check in tree search
+    nodes_created = 1  # Count the origin node as the first node created
+    
+    # CUS2 loop: expand node with the lowest f(n) = g(n) + h(n)
+    while pq:
+        f, g, node, path = heappop(pq)  # Pop node with lowest f(n)
+        # Check if we've reached a goal
+        if node in goals:
+            return node, nodes_created, path
+        
+        # Get neighbors, sorted by node number (ascending order) as per assignment requirement
+        neighbors = sorted(graph.get(node, []), key=lambda x: x[0])
+        # Explore each neighbor
+        for neighbor, _ in neighbors:
+            new_g = g + 1  # Update g(n): number of moves (each edge counts as 1 move)
+            h = heuristic(neighbor)  # Compute h(n) for the neighbor
+            new_f = new_g + h  # Compute f(n) = g(n) + h(n)
+            # Add neighbor to the priority queue with updated path
+            heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
+            nodes_created += 1  # Increment nodes created counter
+    
+    # If no path is found, return None
+    return None, nodes_created, []
 # Main
 def main():
         # Ensure correct usage with 2 command-line arguments
@@ -194,7 +260,7 @@ def main():
 
     filename = sys.argv[1]
     method = sys.argv[2].upper()
-    methods = ["BFS", "DFS", "AS", "GBFS", "CUS1"]
+    methods = ["BFS", "DFS", "AS", "GBFS", "CUS1", "CUS2"]
 
     if method not in methods:
         print("Unsupported search method.\nSupported arguments are:")
@@ -213,6 +279,8 @@ def main():
         goal, nodes_created, path = gbfs(origin, goals, graph, nodes)
     elif method == "CUS1":
         goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
+    elif method == "CUS2":
+        goal, nodes_created, path = CUS2(graph, origin, goals, nodes)
     # Print results in the required output format
     print(f"{filename} {method}")
     if goal:
