@@ -174,7 +174,7 @@ def main():
 
     filename = sys.argv[1]
     method = sys.argv[2].upper()
-    methods = ["BFS", "DFS", "AS"]
+    methods = ["BFS", "DFS", "AS", "GBFS"]
 
     if method not in methods:
         print("Unsupported search method.\nSupported arguments are:")
@@ -189,6 +189,8 @@ def main():
         goal, nodes_created, path = dfs(graph, origin, goals)
     elif method == "AS":
         goal, nodes_created, path = AS(graph, origin, goals, nodes)
+    elif method == "GBFS":
+        goal, nodes_created, path = gbfs(origin, goals, graph, nodes)
     # Print results in the required output format
     print(f"{filename} {method}")
     if goal:
