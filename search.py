@@ -9,7 +9,7 @@ def parse_input_file(filename):
         lines = [line.strip() for line in f if line.strip()]
     
     graph = defaultdict(list)
-    nodes = {}  # Fixed the RAC typo
+    nodes = {}
     origin = None
     goals = set()
     
@@ -38,7 +38,7 @@ def parse_input_file(filename):
     
     return graph, nodes, origin, goals
 
-# BFS (unchanged)
+# Breadth-First Search
 def bfs(graph, origin, goals):
     visited = set()
     queue = deque()
@@ -57,7 +57,7 @@ def bfs(graph, origin, goals):
                 nodes_created += 1
     return None, nodes_created, []
 
-# DFS (unchanged)
+# Depth-First Search
 def dfs(graph, origin, goals):
     visited = set()
     stack = []
@@ -76,7 +76,7 @@ def dfs(graph, origin, goals):
                 nodes_created += 1
     return None, nodes_created, []
 
-# A* (revamped)
+# A* Search
 def euclidean_distance(x1, y1, x2, y2):
     return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
@@ -105,7 +105,6 @@ def AS(graph, origin, goals, coords):
                 nodes_created += 1
     return None, nodes_created, []
 
-# Main
 def main():
     if len(sys.argv) != 3:
         print("Usage: python search.py <filename> <method>")
