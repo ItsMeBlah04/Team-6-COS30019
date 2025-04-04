@@ -166,6 +166,9 @@ def AS(graph, origin, goals, coords):
     return None, nodes_created, []
 
 def cus1(graph, origin, goals, limit=5):
+    """
+        Depth First Limited Search algorithm.
+    """
     visited = set()
     stack = [(origin, [origin], 0)]  # node, path, depth
     visited.add(origin)
@@ -251,9 +254,9 @@ def CUS2(graph, origin, goals, coords):
     
     # If no path is found, return None
     return None, nodes_created, []
-# Main
+
 def main():
-        # Ensure correct usage with 2 command-line arguments
+    # Ensure correct usage with 2 command-line arguments
     if len(sys.argv) != 3:
         print("Usage: python search.py <filename> <method>")
         sys.exit(1)
@@ -266,9 +269,11 @@ def main():
         print("Unsupported search method.\nSupported arguments are:")
         print(*methods, sep=', ')
         sys.exit(1)
+
     # Parse the input file
     graph, nodes, origin, goals = parse_input_file(filename)
-    # Run BFS algorithm
+
+    # Run algorithm based on input parameter
     if method == "BFS":
         goal, nodes_created, path = bfs(graph, origin, goals)
     elif method == "DFS":
@@ -281,6 +286,7 @@ def main():
         goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
     elif method == "CUS2":
         goal, nodes_created, path = CUS2(graph, origin, goals, nodes)
+
     # Print results in the required output format
     print(f"{filename} {method}")
     if goal:
