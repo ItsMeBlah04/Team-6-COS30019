@@ -137,14 +137,18 @@ def heuristic_v2(node, destinations, nodes):
 def euclidean_distance(x1, y1, x2, y2):
     return sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
+def heuristic(node, coords, goals, calculation):
+    if calculation == "euclidean":
+        return min(euclidean_distance(*coords[node], *coords[g]) for g in goals)
+    else:
+        raise ValueError("Unsupported heuristic calculation method.")
+
 def AS(graph, origin, goals, coords):
     '''
         A* Search algorithm.
     '''
-    def heuristic(node):
-        return min(euclidean_distance(*coords[node], *coords[g]) for g in goals)
     
-    h_start = heuristic(origin)
+    h_start = heuristic(origin, coords, goals, 'euclidean')
     pq = [(h_start, 0, origin, [origin])]  # (f, g, node, path)
     visited = set()
     nodes_created = 1
@@ -159,7 +163,7 @@ def AS(graph, origin, goals, coords):
         for neighbor, cost in graph.get(node, []):
             if neighbor not in visited:
                 new_g = g + cost
-                h = heuristic(neighbor)
+                h = heuristic(neighbor, coords, goals, 'euclidean')
                 new_f = new_g + h
                 heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
                 nodes_created += 1
@@ -170,7 +174,7 @@ def cus1(graph, origin, goals, limit=5):
         Depth First Limited Search algorithm.
     """
     visited = set()
-    stack = [(origin, [origin], 0)]  # node, path, depth
+    stack = [(origin, [origin], 0)]  
     visited.add(origin)
     nodes_created = 1
 
@@ -188,72 +192,71 @@ def cus1(graph, origin, goals, limit=5):
 
     return None, nodes_created, []
 
-def manhattan_distance(x1, y1, x2, y2):
+def cus2(graph, origin, goals, nodes):
     """
-    Compute the Manhattan distance between two points.
-    Used as the heuristic in CUS2 to estimate the remaining number of moves.
-    
     Args:
-        x1, y1 (int): Coordinates of the first point
-        x2, y2 (int): Coordinates of the second point
-    
-    Returns:
-        int: Manhattan distance
-    """
-    return abs(x1 - x2) + abs(y1 - y2)
+        graph (dict): adjacency list {node: [(neighbor, cost), ...]}
+        origin (int): start node
+        goals (set): destination nodes
+        nodes (list): list of all node IDs
 
-def CUS2(graph, origin, goals, coords):
+    Returns:
+        tuple: (goal_found, nodes_created, path)
     """
-    Perform a custom informed search (CUS2) to find the path with the least number of moves
-    (edges) from the origin to any goal node. Uses Manhattan distance to estimate remaining moves.
+    costs = {node: float('inf') for node in nodes}
+    costs[origin] = 0
+    previous = {node: None for node in nodes}
+
+    visited = set()
+    node_created = 0
+    pq = [(0, origin)]
+
+    while pq:
+        current_cost, current_node = heappop(pq)
+
+        if current_node in visited:
+            continue
+        visited.add(current_node)
+        node_created += 1
+
+        if current_node in goals:
+            path = []
+            while current_node is not None:
+                path.append(current_node)
+                current_node = previous[current_node]
+            path.reverse()
+            return path[-1], node_created, path  
+
+        for neighbor, weight in graph.get(current_node, []):
+            if neighbor in visited:
+                continue
+            new_cost = current_cost + weight
+            if new_cost < costs[neighbor]:
+                costs[neighbor] = new_cost
+                previous[neighbor] = current_node
+                heappush(pq, (new_cost, neighbor))
+
+    return None, node_created, []
+
+
+def calculate_path_cost(graph, path):
+    """
+    Calculate the total cost of a path in the graph.
     
     Args:
         graph (defaultdict): Adjacency list of the graph
-        origin (int): Starting node ID
-        goals (set): Set of destination node IDs
-        coords (dict): Dictionary mapping node IDs to (x, y) coordinates
+        path (list): List of node IDs representing the path
     
     Returns:
-        tuple: (goal, nodes_created, path)
-            - goal: First goal node reached (or None if no path)
-            - nodes_created: Number of nodes added to the priority queue
-            - path: List of node IDs from origin to goal (or empty list if no path)
+        int: Total cost of the path
     """
-    def heuristic(node):
-        # Heuristic: estimate the number of moves to the nearest goal
-        # Use Manhattan distance scaled by an average edge length (approximated as 4)
-        # This approximates the remaining number of moves (edges) to the goal
-        avg_edge_length = 4  # Based on sample graph edge costs (4, 5, 6, etc.)
-        return min(manhattan_distance(*coords[node], *coords[g]) / avg_edge_length for g in goals)
-    
-    # Compute initial heuristic value for the origin
-    h_start = heuristic(origin)
-    # Priority queue: (f, g, node, path), where f = g + h
-    # g is the number of moves so far, h is the estimated remaining moves
-    pq = [(h_start, 0, origin, [origin])]
-    visited = set()  # Used only for goal check in tree search
-    nodes_created = 1  # Count the origin node as the first node created
-    
-    # CUS2 loop: expand node with the lowest f(n) = g(n) + h(n)
-    while pq:
-        f, g, node, path = heappop(pq)  # Pop node with lowest f(n)
-        # Check if we've reached a goal
-        if node in goals:
-            return node, nodes_created, path
-        
-        # Get neighbors, sorted by node number (ascending order) as per assignment requirement
-        neighbors = sorted(graph.get(node, []), key=lambda x: x[0])
-        # Explore each neighbor
-        for neighbor, _ in neighbors:
-            new_g = g + 1  # Update g(n): number of moves (each edge counts as 1 move)
-            h = heuristic(neighbor)  # Compute h(n) for the neighbor
-            new_f = new_g + h  # Compute f(n) = g(n) + h(n)
-            # Add neighbor to the priority queue with updated path
-            heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
-            nodes_created += 1  # Increment nodes created counter
-    
-    # If no path is found, return None
-    return None, nodes_created, []
+    total_cost = 0
+    for i in range(len(path) - 1):
+        for neighbor, cost in graph[path[i]]:
+            if neighbor == path[i + 1]:
+                total_cost += cost
+                break
+    return total_cost
 
 def main():
     # Ensure correct usage with 2 command-line arguments
@@ -285,15 +288,16 @@ def main():
     elif method == "CUS1":
         goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
     elif method == "CUS2":
-        goal, nodes_created, path = CUS2(graph, origin, goals, nodes)
+        goal, nodes_created, path = cus2(graph, origin, goals, nodes)
 
     # Print results in the required output format
     print(f"{filename} {method}")
     if goal:
         print(f"{goal} {nodes_created}") 
-        print("->".join(map(str, path))) # Print path in arrow format
+        print("->".join(map(str, path))) 
+        total_cost = calculate_path_cost(graph, path)
+        print(f"Total cost: {total_cost}")
     else:
-        print("No path found.") # No path to any destination
-# Run the main function when the script is executed directly
+        print("No path found.") 
 if __name__ == "__main__":
     main()
