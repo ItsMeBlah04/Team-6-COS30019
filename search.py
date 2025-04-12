@@ -259,7 +259,6 @@ def calculate_path_cost(graph, path):
     return total_cost
 
 def main():
-    # Ensure correct usage with 2 command-line arguments
     if len(sys.argv) != 3:
         print("Usage: python search.py <filename> <method>")
         sys.exit(1)
