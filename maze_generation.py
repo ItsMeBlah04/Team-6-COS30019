@@ -1,6 +1,16 @@
 import random
 
 class MazeGeneration:
+    """
+        Generates a maze using Wilson's algorithm and exports it to a text file.
+        
+        Parameters:
+        - width (int): Width of the maze (odd number preferred for maze structure).
+        - height (int): Height of the maze (odd number preferred for maze structure).
+        - filename (str): Output file name for the exported maze data.
+        - num_destinations (int): Number of destination nodes to randomly select.
+        - max_weight (int): Maximum edge weight for graph connections.
+    """
     def __init__(self, width, height, filename="generated_maze.txt", num_destinations=1, max_weight=5):
         self.width = width if width % 2 == 1 else width + 1
         self.height = height if height % 2 == 1 else height + 1
@@ -13,9 +23,23 @@ class MazeGeneration:
         self.destinations = []
 
     def _in_bounds(self, y, x):
+        """
+            Check if (y, x) is inside the maze boundaries.
+            
+            Parameters:
+            - y (int): Row index.
+            - x (int): Column index.
+            
+            Returns:
+            - bool: True if (y, x) is within bounds, else False.
+        """
         return 0 < y < self.height and 0 < x < self.width
 
     def generate(self):
+        """
+            Generates the maze using Wilson's algorithm and stores the maze structure internally.
+            No return value.
+        """
         directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
         dir_to_wall = {
             (-2, 0): (-1, 0),
@@ -67,6 +91,17 @@ class MazeGeneration:
         self.maze[self.height - 2][self.width - 2] = 1
 
     def export(self):
+        """
+            Converts the generated maze into a graph format with node IDs and weighted edges,
+            then exports it to the specified text file.
+            
+            Output includes:
+            - Node positions
+            - Edge connections with weights
+            - Origin node
+            - Destination nodes
+            No return value.
+        """
         node_counter = 1
         for y in range(self.height):
             for x in range(self.width):
