@@ -141,6 +141,8 @@ class Benchmark:
         Output:
         - Saves three visual plots in the 'benchmark' directory.
         """
+        if not os.path.exists("./benchmark"):
+            os.makedirs("./benchmark")
         main_folder = os.path.dirname(os.path.abspath(__file__))
         filenames = sorted([file for file in os.listdir(main_folder) if file.endswith(".txt")])
         algorithm_names = list(self.algorithms.keys())
@@ -158,6 +160,8 @@ class Benchmark:
         self.visualize_averages(results, algorithm_names)
         self.visualize_path_costs(results, algorithm_names, filenames)
         self.visualize_nodes_created(results, algorithm_names, filenames)
+
+        print("Benchmarking completed. Results saved in the 'benchmark' directory.")
 
 if __name__ == "__main__":
     benchmark = Benchmark()
