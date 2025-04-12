@@ -93,7 +93,7 @@ def dfs(graph, origin, goals):
                 nodes_created += 1
     return None, nodes_created, []
 
-def gbfs(start, destinations, graph, nodes):
+def gbfs(graph, start, destinations, nodes):
     '''
         Greedy Best-First Search algorithm.
     '''
@@ -284,7 +284,7 @@ def main():
     elif method == "AS":
         goal, nodes_created, path = AS(graph, origin, goals, nodes)
     elif method == "GBFS":
-        goal, nodes_created, path = gbfs(origin, goals, graph, nodes)
+        goal, nodes_created, path = gbfs(graph, origin, goals, nodes)
     elif method == "CUS1":
         goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
     elif method == "CUS2":
