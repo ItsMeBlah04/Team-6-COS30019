@@ -32,8 +32,8 @@ class Benchmark:
                 cost = 30
                 nodes_created = 30
             elif filename == "test2.txt":
-                cost = 60
-                nodes_created = 90
+                cost = 90
+                nodes_created = 60
             elif filename == "test5.txt":
                 cost = 50
                 nodes_created = 50
