@@ -3,22 +3,20 @@ from collections import deque, defaultdict
 from heapq import heappush, heappop
 from math import sqrt
 
-# Function to parse the input file and construct the graph, origin, and destinations
 def parse_input_file(filename):
-    # Open and read all non-empty lines from the input file
     '''
         Parses the input file and returns the graph, nodes, origin, and goals.
     '''
     with open(filename, 'r') as f:
         lines = [line.strip() for line in f if line.strip()]
     
-    graph = defaultdict(list) # Graph stored as an adjacency list
-    nodes = {}  # Stores coordinates of nodes (not used in BFS logic)
-    origin = None # Origin node
-    goals = set() # To track the current section of the file being parsed
+    graph = defaultdict(list) 
+    nodes = {}  
+    origin = None 
+    goals = set() 
     
     section = None
-    for line in lines: # Loop through all lines to build graph components
+    for line in lines: 
         if line.startswith("Nodes:"):
             section = "nodes"
         elif line.startswith("Edges:"):
@@ -28,46 +26,39 @@ def parse_input_file(filename):
         elif line.startswith("Destinations:"):
             section = "destinations"
         elif section == "nodes":
-            # Parse node and its coordinate
             node_id, coord = line.split(":")
             node_id = int(node_id.strip())
             nodes[node_id] = tuple(map(int, coord.strip().strip("()").split(",")))
         elif section == "edges":
-            # Parse edge (directed) and cost, add to graph
             edge_part, cost = line.split(":")
             n1, n2 = map(int, edge_part.strip("()").split(","))
             graph[n1].append((n2, int(cost.strip())))
         elif section == "origin":
-            # Parse origin node
             origin = int(line.strip())
         elif section == "destinations":
-            # Parse multiple destination nodes
             goals = set(map(int, line.strip().split(";")))
-    # Return the constructed graph and start/end info
     return graph, nodes, origin, goals
 
 def bfs(graph, origin, goals):
     '''
         Breadth-First Search algorithm
     '''
-    visited = set() # Keep track of visited nodes
-    queue = deque() # FIFO queue for BFS
-    queue.append((origin, [origin])) # Start from origin with path containing just origin
+    visited = set() 
+    queue = deque() 
+    queue.append((origin, [origin])) 
     visited.add(origin)
-    nodes_created = 1 # Counter for number of nodes added to queue
+    nodes_created = 1 
     while queue:
-        current_node, path = queue.popleft() # Pop the next node from the queue
+        current_node, path = queue.popleft() 
 
-        # Check if current node is one of the destinations
         if current_node in goals:
             return current_node, nodes_created, path
-        # Get all neighbors, sorted in ascending order by node number
         neighbors = sorted(graph[current_node], key=lambda x: x[0])
         for neighbor, _ in neighbors:
             if neighbor not in visited:
-                visited.add(neighbor) # Mark as visited
-                queue.append((neighbor, path + [neighbor])) # Append new path
-                nodes_created += 1 # Increment created node count
+                visited.add(neighbor) 
+                queue.append((neighbor, path + [neighbor])) 
+                nodes_created += 1 
 
     # If no path is found            
     return None, nodes_created, []
@@ -169,7 +160,7 @@ def AS(graph, origin, goals, coords):
                 nodes_created += 1
     return None, nodes_created, []
 
-def cus1(graph, origin, goals, limit=5):
+def cus1(graph, origin, goals, limit=1000):
     """
         Depth First Limited Search algorithm.
     """
@@ -285,7 +276,7 @@ def main():
     elif method == "GBFS":
         goal, nodes_created, path = gbfs(graph, origin, goals, nodes)
     elif method == "CUS1":
-        goal, nodes_created, path = cus1(graph, origin, goals, limit=5)
+        goal, nodes_created, path = cus1(graph, origin, goals, limit=1000)
     elif method == "CUS2":
         goal, nodes_created, path = cus2(graph, origin, goals, nodes)
 

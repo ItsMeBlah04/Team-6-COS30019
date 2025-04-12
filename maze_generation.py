@@ -1,14 +1,16 @@
 import random
 
 class MazeGeneration:
-    def __init__(self, width, height, filename="generated_maze.txt"):
+    def __init__(self, width, height, filename="generated_maze.txt", num_destinations=1, max_weight=5):
         self.width = width if width % 2 == 1 else width + 1
         self.height = height if height % 2 == 1 else height + 1
         self.filename = filename
+        self.num_destinations = num_destinations
+        self.max_weight = max_weight
         self.maze = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.node_id_map = {}
         self.origin = None
-        self.destination = None
+        self.destinations = []
 
     def _in_bounds(self, y, x):
         return 0 < y < self.height and 0 < x < self.width
@@ -60,7 +62,9 @@ class MazeGeneration:
             visited.update(path)
 
         self.maze[1][0] = 1
+        self.maze[1][1] = 1
         self.maze[self.height - 2][self.width - 1] = 1
+        self.maze[self.height - 2][self.width - 2] = 1
 
     def export(self):
         node_counter = 1
@@ -72,14 +76,19 @@ class MazeGeneration:
 
         edges = []
         for (y, x), node_id in self.node_id_map.items():
-            for dy, dx in [(0, 1), (1, 0)]:  
+            for dy, dx in [(0, 1), (1, 0)]:
                 ny, nx = y + dy, x + dx
                 if (ny, nx) in self.node_id_map:
                     neighbor_id = self.node_id_map[(ny, nx)]
-                    edges.append(((node_id, neighbor_id), 1))
+                    weight = random.randint(1, self.max_weight)
+                    edges.append(((node_id, neighbor_id), weight))
+                    edges.append(((neighbor_id, node_id), weight))  
 
         self.origin = self.node_id_map.get((1, 0))
-        self.destination = self.node_id_map.get((self.height - 2, self.width - 1))
+
+        all_nodes = list(self.node_id_map.values())
+        all_nodes.remove(self.origin)
+        self.destinations = random.sample(all_nodes, min(self.num_destinations, len(all_nodes)))
 
         with open(self.filename, "w") as f:
             f.write("Nodes:\n")
@@ -94,9 +103,10 @@ class MazeGeneration:
             f.write(f"{self.origin}\n")
 
             f.write("Destinations:\n")
-            f.write(f"{self.destination}\n")
+            for dest in self.destinations:
+                f.write(f"{dest}\n")
 
 if __name__ == "__main__":
-    maze_gen = MazeGeneration(width=15, height=15, filename="test5.txt")
+    maze_gen = MazeGeneration(width=13, height=13, filename="test2.txt", num_destinations=1, max_weight=10)
     maze_gen.generate()
     maze_gen.export()

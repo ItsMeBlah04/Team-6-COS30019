@@ -23,20 +23,11 @@ class Benchmark:
         else:
             destination, nodes_created, path = algorithm(graph, origin, goal)
 
-        if destination:
-            cost = calculate_path_cost(graph, path)
-        else:
-            cost = 20
-            nodes_created = 20
-            if filename == "test1.txt":
-                cost = 30
-                nodes_created = 30
-            elif filename == "test2.txt":
-                cost = 90
-                nodes_created = 60
-            elif filename == "test5.txt":
-                cost = 50
-                nodes_created = 50
+        # if destination:
+        cost = calculate_path_cost(graph, path)
+        # else:
+        #     cost = 20
+        #     nodes_created = 20
 
         return cost, nodes_created
 
@@ -56,7 +47,7 @@ class Benchmark:
         plt.title("Benchmarking Search Algorithms")
         plt.legend()
         plt.tight_layout()
-        plt.savefig("benchmark_results.png")
+        plt.savefig("./benchmark/benchmark_results.png")
 
     def visualize_path_costs(self, results, algorithm_names, filenames):
         x = np.arange(len(filenames))
@@ -71,7 +62,7 @@ class Benchmark:
         plt.title("Path Cost per Testcase for All Algorithms")
         plt.legend()
         plt.tight_layout()
-        plt.savefig("path_cost_per_testcase.png")
+        plt.savefig("./benchmark/path_cost_per_testcase.png")
 
     def visualize_nodes_created(self, results, algorithm_names, filenames):
         x = np.arange(len(filenames))
@@ -86,7 +77,7 @@ class Benchmark:
         plt.title("Nodes Created per Testcase for All Algorithms")
         plt.legend()
         plt.tight_layout()
-        plt.savefig("nodes_created_per_testcase.png")
+        plt.savefig("./benchmark/nodes_created_per_testcase.png")
 
     def run(self):
         main_folder = os.path.dirname(os.path.abspath(__file__))
