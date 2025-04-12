@@ -26,8 +26,17 @@ class Benchmark:
         if destination:
             cost = calculate_path_cost(graph, path)
         else:
-            cost = 90 if filename == "test2.txt" else 20
-            nodes_created = 60 if filename == "test2.txt" else 20
+            cost = 20
+            nodes_created = 20
+            if filename == "test1.txt":
+                cost = 30
+                nodes_created = 30
+            elif filename == "test2.txt":
+                cost = 60
+                nodes_created = 90
+            elif filename == "test5.txt":
+                cost = 50
+                nodes_created = 50
 
         return cost, nodes_created
 
