@@ -15,7 +15,7 @@ class Benchmark:
             "Custom 2": cus2
         }
 
-    def run_algorithm_on_file(self, algorithm, algorithm_name, file_path, filename):
+    def run_algorithm(self, algorithm, algorithm_name, file_path, filename):
         graph, nodes, origin, goal = parse_input_file(file_path)
 
         if algorithm_name in ["GBFS", "AStar", "Custom 2"]:
@@ -23,11 +23,7 @@ class Benchmark:
         else:
             destination, nodes_created, path = algorithm(graph, origin, goal)
 
-        # if destination:
         cost = calculate_path_cost(graph, path)
-        # else:
-        #     cost = 20
-        #     nodes_created = 20
 
         return cost, nodes_created
 
@@ -90,7 +86,7 @@ class Benchmark:
             file_path = os.path.join(main_folder, filename)
 
             for name, algorithm in self.algorithms.items():
-                cost, nodes = self.run_algorithm_on_file(algorithm, name, file_path, filename)
+                cost, nodes = self.run_algorithm(algorithm, name, file_path, filename)
                 results[name]["costs"].append(cost)
                 results[name]["nodes"].append(nodes)
 
